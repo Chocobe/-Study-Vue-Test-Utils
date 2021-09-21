@@ -1,5 +1,5 @@
 <script>
-import MyButton from "@/components/03_MyButton/MyButton.vue";
+import NumberList from "@/components/04_NumberList/NumberList.vue";
 
 export default {
   name: "App",
@@ -7,7 +7,7 @@ export default {
   render() {
     return (
       <div id="app">
-        <MyButton msg="Hello World" isAdmin={true} />
+        <NumberList isOdd={true} />
       </div>
     );
   },

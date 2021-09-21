@@ -19,6 +19,8 @@
 
 05. [wrapper 생성을 위한 Factory 함수](#05)
 
+06. [``computed`` 테스트](#06)
+
 
 
 <br/>
@@ -414,3 +416,155 @@ wrapper 객체를 만들기 위한 factoryForMyButton() 을 사용하여 동일�
 
 
 ##### 06
+## 06. ``computed`` 테스트
+
+computed 는 내부 로직에 따라 값을 반환하는 getter 입니다.
+
+computed 를 테스트하는 방법은 두가지가 있습니다.
+
+* wrapper 를 사용한 테스트
+* Function.prototype.call() 을 사용한 테스트
+
+<br/>
+
+아래의 코드는 이번 테스트를 위한 NumberList 컴포넌트 입니다.
+
+``props.isOdd === true`` 일 때, computed.numberList 는 ``"1, 3, 5, 7, 9"`` 를 반환 합니다.
+``props.isOdd ===false`` 일 때, computed.numberList 는 ``"0, 2, 4, 6, 8"`` 을 반환 합니다.
+
+```html
+<!-- NumberList.vue -->
+<!-- 경로: "@/components/04_NumberList/NumberList.vue -->
+
+<script>
+export default {
+  props: {
+    isOdd: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  computed: {
+    numberList() {
+      return Array.from({ length: 10 }, (_v, i) => i)
+        .filter(v => !!(v % 2) === this.isOdd)
+        .join(", ");
+    },
+  },
+
+  render() {
+    return <div>{this.numberList}</div>;
+  },
+};
+</script>
+```
+
+
+<br/><br/>
+
+
+### 06-01. ``wrapper`` 를 사용한 ``computed`` 테스트
+
+``wrapper`` 를 사용한 방법은 기존과 동일합니다.
+
+``wrapper`` 를 생성할 때 ``props`` 를 넘겨주고, ``computed`` 결과값을 확인합니다.
+
+```javascript
+// 경로: "@/components/04_NumberList/__tests__/NumberList.spec.js"
+
+import NumberList from "../NumberList.vue";
+import { shallowMount } from "@vue/test-utils";
+
+describe("NumberList 테스트", () => {
+  it("isOdd === false, 짝수 출력", () => {
+    const wrapper = shallowMount(NumberList);
+
+    expect(wrapper.text()).toBe("0, 2, 4, 6, 8");
+  });
+
+  it("isOdd === true, 홀수 출력", () => {
+    const wrapper = shallowWrapper(NumberList, {
+      propsData: {
+        isOdd: true,
+      },
+    });
+
+    expect(wrapper.text()).toBe("0, 2, 4, 6, 8");
+  });
+});
+```
+
+<br/>
+
+위의 테스트 결과, 의도한 결과를 얻을 수 있습니다.
+
+<img src="./readmeAssets/05-computed-test-01.png" width="700px"><br/>
+
+
+<br/><br/>
+
+
+### 06-02. ``Function.prototype.call()`` 을 사용한 ``computed`` 테스트
+
+이번에는 ``computed`` 테스트에 wrapper 를 사용하지 않고, ``Function.prototype.call()`` 을 사용해 보겠습니다.
+
+``call()`` 메서드의 첫번째 인자는 ``thisArg`` 입니다.
+
+메서드를 실행할 때, 사용할 ``this 객체`` 를 직접 주입하여 실행할 수 있습니다.
+
+<br/>
+
+```javascript
+// 경로: "@/components/04_NumberList/__tests__/NumberList2.spec.js"
+
+import NumberList from "../NumberList.vue";
+
+describe("NumberList 테스트", () => {
+  it("isOdd === false 일 때, 짝수 출력", () => {
+    const thisArg = { isOdd: false };
+
+    expect(NumberList.computed.numberList.call(thisArg)).toBe("0, 2, 4, 6, 8");
+  });
+
+  it("isOdd === true 일 때, 홀수 출력", () => {
+    const thisArg = { isOdd: true };
+
+    expect(NumberList.computed.numberList.call(thisArg)).toBe("1, 3, 5, 7, 9");
+  });
+});
+```
+
+<br/>
+
+<img src="./readmeAssets/05-computed-test-02.png" width="700px"><br/>
+
+
+<br/><br/>
+
+
+### 06-03. ``wrapper`` 방식과 ``call`` 방식 비교
+
+``wrapper`` 방식의 ``computed`` 테스트는 기존의 방법과 동일 합니다.
+
+``call`` 을 사용해도 동일한 테스트를 할 수 있습니다.
+
+일반적으로는 ``wrapper`` 를 사용한 테스트를 작성하지만, 테스트할 ``computed`` 만 단독으로 테스트할 경우, ``call`` 을 사용하면 간단하게 테스트를 작성할 수 있습니다.
+
+그리고 ``call`` 을 사용하면, Mount 과정이 없기 때문에 ``Vue Life Cycle`` 이 실행되지 않고 테스트가 되므로, 좀 더 빠른 테스트가 가능합니다.
+
+<br/>
+
+``wrapper`` 와 ``call`` 어떤것을 사용해도 테스트가 되기 때문에, 적절히 선택하면 됩니다.
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+###### 07
