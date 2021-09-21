@@ -1,5 +1,5 @@
 <script>
-import Parent from "@/components/02_Mount/Parent.vue";
+import MyButton from "@/components/03_MyButton/MyButton.vue";
 
 export default {
   name: "App",
@@ -7,7 +7,7 @@ export default {
   render() {
     return (
       <div id="app">
-        <Parent />
+        <MyButton msg="Hello World" isAdmin={true} />
       </div>
     );
   },

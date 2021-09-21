@@ -15,6 +15,8 @@
 
 03. [mount() 와 shallowMount()](#03)
 
+04. [컴포넌트의 props 테스트](#04)
+
 
 
 <br/>
@@ -212,3 +214,138 @@ mount() 를 사용하게 되면, 모든 의존성 컴포넌트를 그대로 사�
 
 
 ##### 04
+## 04. 컴포넌트의 props 테스트
+
+컴포넌트의 ``props`` 는 부모 컴포넌트로 부터 전달받는 데이터 입니다.
+
+``props`` 를 테스트하기 위해서는, mount() 또는 shallowMount() 호출 시, options 객체에 props를 Mock데이터로 넘겨주어 테스트할 수 있습니다.
+
+```typescript
+interface mount {
+  (Vue생성자: VueConstructor, options: object): Wrapper,
+}
+
+interface shallowMount {
+  (Vue생성자: VueConstructor, options: object): Wrapper,
+}
+```
+
+<br/>
+
+| 공식문서: https://vue-test-utils.vuejs.org/api/options.html#propsdata
+
+<br/>
+
+``options`` 객체에는 ``propsData`` 속성이 있으며, Vue 컴포넌트의 Props에 데이터를 넘겨줄 수 있습니다.
+
+아래 코드는 props 를 테스트하기 위한 MyButton 컴포넌트 입니다.
+
+```html
+<script>
+export default {
+  name: "MyButton",
+
+  props: {
+    msg: {
+      type: String,
+      required: true,
+    },
+
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  render() {
+    const span = this.isAdmin ? "Admin Privileges" : "Not Authorized";
+
+    return (
+      <div>
+        <span style="margin-right: 10px;">{span}</span>
+        <button>{msg}</button>
+      </div>
+    );
+  },
+};
+</script>
+```
+
+<br/>
+
+첫번째 테스트 케이스는 ``isAmin`` 값이 ``false`` 일 때, 테스트 입니다.
+
+```javascript
+// 경로: "@/components/03_MyButton/__tests__/MyButton.spec.js"
+
+import { shallowMount } from "@vue/test-utils";
+import MyButton from "@/components/03_MyButton/MyButton.vue";
+
+describe("MyButton 테스트", () => {
+  it("isAmin === false 일 때, 'Not Authorized' 메시지 출력", () => {
+    const wrapper = shallowMount(MyButton, {
+      propsData: {
+        msg: "제출",
+      },
+    });
+
+    console.log(wrapper.html());
+
+    expect(wrapper.find("span").text()).toBe("Not Authorized");
+    expect(wrapper.find("button").text()).toBe("제출");
+  });
+});
+```
+
+<br/>
+
+위의 테스트 실행 결과, props로 넘겨준 msg가 테스트 통과된 것을 알 수 있습니다.
+
+<img src="./readmeAssets/04-props-test-01.png" width="700px"><br/>
+
+<br/>
+
+이제 두번째 테스트로 ``isAdmin`` 값이 ``true`` 일 때, 테스트 입니다.
+
+```javascript
+// 경로: "@/components/03_MyButton/__tests__/MyButton.spec.js"
+
+import { shallowMount } from "@vue/test-utils";
+import MyButton from "../MyButton.vue";
+
+describe("MyButton 테스트", () => {
+  it("isAdmin === true 일 때, 'Admin Privileges' 메시지 출력", () => {
+    const wrapper = shallowMount(MyButton, {
+      propsData: {
+        msg: "제출버튼",
+        isAdmin: true,
+      },
+    });
+
+    console.log(wrapper.html());
+
+    expect(wrapper.find("span").text()).toBe("Admin Privileges");
+    expect(wrapper.find("button").text()).toBe("제출버튼");
+  });
+});
+```
+
+<br/>
+
+위의 테스트 결과 역시 통과한 것을 알 수 있습니다.
+
+<img src="./readmeAssets/04-props-test-02.png" width="700px"><br/>
+
+<br/>
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 05
