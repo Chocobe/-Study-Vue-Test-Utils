@@ -13,6 +13,8 @@
 
 02. [expect() 함수의 Matchers: ``JestMatchers``](#02)
 
+03. [mount() 와 shallowMount()](#03)
+
 
 
 <br/>
@@ -112,3 +114,101 @@ describe("테스트 개요", () => {
 
 
 ##### 03
+## mount() 와 shallowMount()
+
+Vue 컴포넌트를 테스트 하기 위해서는, 실제 DOM 에 Mount 되어야 할 수 있지만, Vue Test Utils 에서는 가상의 Mount 함수를 제공하고 있습니다.
+
+테스트용 Mount는 두가지 방법이 있습니다.
+
+* ``mount()``
+* ``shallowMount()``
+
+<br/>
+
+``mount()`` 와 ``shallowMount()`` 는 둘 다 Mount 기능을 하지만, 차이점은 다음과 같습니다.
+
+* mount(): Mount 대상 컴포넌트의 모든 의존성을 포함 합니다.
+* shallowMount(): 의존 컴포넌트를 모두 ``Stub`` 객체로 대체 합니다.
+
+<br/>
+
+아래 코드는 Parent 컴포넌트가 Child 컴포넌트에 의존하는 형식 입니다.
+
+Parent 컴포넌트를 사용하여, mount() 와 shallowMount() 를 비교하면 다음과 같은 결과를 얻을 수 있습니다.
+
+<br/>
+
+```html
+<!-- Child.vue -->
+<!-- 경로: "@/components/02_Mount/Child.vue -->
+
+<script>
+export default {
+  render() {
+    return <div>Child Component</div>;
+  },
+};
+</script>
+```
+
+```html
+<!-- Parent.vue -->
+<!-- 경로: "@/components/02_Mount/Parent.vue" -->
+
+<script>
+import Child from "./Child.vue";
+
+export default {
+  render() {
+    return (
+      <div>
+        <Child />
+      </div>
+    );
+  },
+};
+</script>
+```
+
+```javascript
+// 경로: "@/components/02_Mount/__tests__/Mount.spec.js"
+
+import { mount, shallowMount } from "@vue/test-utils";
+import Parent from "../Parent.vue";
+
+describe("02 Mount", () => {
+  it("Parent 컴포넌트의 html() 비교", () => {
+    const shallowWrapper = shallowMount(Parent);
+    const mountWrapper = mount(Parent);
+
+    console.log(shallowWrapper.html());
+    console.log(mountWrapper.html());
+  });
+});
+```
+
+<br/>
+
+<img src="./readmeAssets/03-Mount-01.png" width="700px"><br/>
+
+<br/>
+
+위의 결과를 보면, shallowMount() 과 mount() 의 html() 결과가 다르다는 것을 알 수 있습니다.
+
+mount() 를 사용하게 되면, 모든 의존성 컴포넌트를 그대로 사용합니다.
+
+반면, shallowMount() 를 사용하면, 의존성 컴포넌트를 ``<anonymous-stub>``으로 대체하여 사용하게 됩니다.
+
+즉, shallowMount() 는 해당 컴포넌트만을 테스트할 수 있도록 고립된 상태로 Mount 합니다.
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 04

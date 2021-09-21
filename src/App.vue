@@ -1,17 +1,15 @@
-<template>
-  <div id="app">
-    <Greeting />
-  </div>
-</template>
-
 <script>
-import Greeting from "@/components/Greeting.vue";
+import Parent from "@/components/02_Mount/Parent.vue";
 
 export default {
   name: "App",
 
-  components: {
-    Greeting,
+  render() {
+    return (
+      <div id="app">
+        <Parent />
+      </div>
+    );
   },
 };
 </script>
