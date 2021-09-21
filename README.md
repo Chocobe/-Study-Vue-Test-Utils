@@ -17,6 +17,8 @@
 
 04. [컴포넌트의 props 테스트](#04)
 
+05. [wrapper 생성을 위한 Factory 함수](#05)
+
 
 
 <br/>
@@ -349,3 +351,66 @@ describe("MyButton 테스트", () => {
 
 
 ##### 05
+## 05. wrapper 생성을 위한 Factory 함수
+
+wrapper 객체를 생성하기 위해, 지금까지는 각 테스트 케이스에서 shallowMount() 또는 mount() 를 사용하였습니다.
+
+하지만, 이 코드는 반복 코드로 ``DRY (Don't Repeat Yourself)`` 원칙에 위배됩니다.
+
+따라서 다음과 같이 wrapper 객체를 반환하는 ``factory`` 함수를 작성하면 좋습니다.
+
+```javascript
+import MyButton from "../MyButton.vue";
+import { shallowMount } from "@vue/test-utils";
+
+const factoryForMyButton = props => {
+  return shallowMount(MyButton, {
+    propsData: {
+      ...props,
+    },
+  });
+};
+
+describe("MyButton 테스트", () => {
+  it("isAdmin === false 테스트", () => {
+    const wrapper = factoryForMyButton({
+      msg: "제출Button",
+    });
+
+    expect(wrapper.find("span").text()).toBe("Not Authorized");
+    expect(wrapper.find("button").text()).toBe("제출Button");
+  });
+
+  it("isAdmin === true 테스트", () => {
+    const wrapper = factoryForMyButton({
+      msg: "제출버튼",
+      isAdmin: true,
+    });
+
+    expect(wrapper.find("span").text()).toBe("Admin Privileges");
+    expect(wrapper.find("button").text()).toBe("제출버튼");
+  });
+});
+```
+
+<br/>
+
+<img src="./readmeAssets/04-props-test-03.png" width="700px"><br/>
+
+<br/>
+
+wrapper 객체를 만들기 위한 factoryForMyButton() 을 사용하여 동일한 테스트를 할 수 있게 되었습니다.
+
+이로써, DRY 원칙을 만족하는 테스트 유닛을 작성할 수 있게 되었습니다.
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 06
