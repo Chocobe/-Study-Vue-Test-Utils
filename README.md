@@ -23,13 +23,11 @@
 
 07. [Event 테스트](#07)
 
+08. [08. Event 발생여부 테스트](#08)
 
 
-<br/>
 
-[🔺 Top](#top)
-
-<hr/><br/>
+<br/><hr/><br/>
 
 
 
@@ -731,3 +729,97 @@ wrapper.destroy();
 
 
 ##### 08
+## 08. Event 발생여부 테스트
+
+``07. Event 테스트`` 에서는 이벤트가 발생한 결과를 테스트 하였습니다.
+
+만약, 이벤트가 발생되었는지만 테스트하고 싶다면, ``wrapper.emitted()`` 를 사용할 수 있습니다.
+
+아래 코드는 ``myEvent`` 를 발생시키는 컴포넌트 입니다.
+
+```html
+<!-- 경로: "@/components/06_MyEvent/MyEvent.vue" -->
+
+<script>
+export default {
+  methods: {
+    emitMyEvent() {
+      this.$emit("myEvent", "Hello", "Alice");
+    },
+  },
+
+  render() {
+    return <div></div>;
+  },
+};
+</script>
+```
+
+<br/>
+
+위의 ``MyEvent`` 컴포넌트를 테스트하기 위해 다음과 같이 테스트 코드를 작성 합니다.
+
+```javascript
+// 경로: "@/components/06_MyEvent/__tests__/MyEvent.spec.js"
+
+import MyEvent from "@/components/06_MyEvent/MyEvent.vue";
+import { shallowMount } from "@vue/test-utils";
+
+describe("MyEvent 테스트", () => {
+  it("myEvent 발생", () => {
+    const wrapper = shallowMount(MyEvent);
+    wrapper.vm.emitMyEvent();
+
+    expect(wrapper.emitted().myEvent[0]).toEqual(["Hello", "Alice"]);
+  });
+});
+```
+
+<br/>
+
+<img src="./readmeAssets/07-event-emit-test-01.png" width="700px"><br/>
+
+<br/>
+
+``myEvent`` 를 발생 시키기 위해, ``emitMyEvent()`` 메서드를 호출 하였습니다.
+
+```javascript
+wrapper.vm.emitMyEvent();
+```
+
+<br/>
+
+``emitMyEvent()`` 메서드에서 정상적으로 ``myEvent`` 가 발생 되었다면, ``wrapper.emitted()`` 메서드를 통해서, 발생한 이벤트 내역을 확인할 수 있습니다.
+
+``wrapper.emitted()`` 메서드는, 발생했던 모든 이벤트를 객체 형식으로 반환 합니다.
+
+```javascript
+{
+  myEvent: [],
+  myEvent02: [],
+  // ...
+}
+```
+
+<br/>
+
+그리고 각 이벤트 내역을 가진 속성은, 이벤트가 발생하면서 전달한 데이터를 배열 형태로 순서대로 보관하고 있습니다.
+
+그래서 아래와 같은 방법으로 Assertion 을 할 수 있습니다.
+
+```javascript
+// 첫번째 "myEvent" 발생으로 받은 데이터: ["Hello", "Alice"]
+expect(wrapper.emitted().myEvent[0]).toEqual(["Hello", "Alice"]);
+```
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 09
