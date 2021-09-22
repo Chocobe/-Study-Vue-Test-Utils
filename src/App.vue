@@ -1,5 +1,5 @@
 <script>
-import Todo from "@/components/07_MockMethod/Todo.vue";
+import MyInfo from "@/components/08_Spy/MyInfo.vue";
 
 export default {
   name: "App",
@@ -7,7 +7,7 @@ export default {
   render() {
     return (
       <div id="app">
-        <Todo />
+        <MyInfo />
       </div>
     );
   },

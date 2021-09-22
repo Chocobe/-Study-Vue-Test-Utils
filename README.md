@@ -27,6 +27,8 @@
 
 09. [09. 테스트를 위한 Mock 함수](#09)
 
+10. [10. spyOn()](#10)
+
 
 
 <br/><hr/><br/>
@@ -980,3 +982,210 @@ Mock 함수를 사용한 테스트 역시 테스트를 통과함을 알 수 있�
 
 
 ##### 10
+## 10. spyOn()
+
+Mock 함수를 사용하기 위해 ``jest.fn()`` 을 사용하여 정상적인 테스트가 가능하였습니다.
+
+하지만, ``axios.get`` 에 직접 Override 하였기 때문에, 다음 테스트 부터는 Override 된 ``axios.get`` 을 사용하게 되는 문제가 있습니다.
+
+이 경우는, 테스트 케이스의 실행 순서에 따라, 테스트 결과가 달라지는 큰 문제를 가질 수 있습니다.
+
+<br/>
+
+먼저 이번에 사용할 예시 컴포넌트는 다음과 같습니다.
+
+```html
+<!-- 경로: "@/components/08_Spy/MyInfo.vue" -->
+
+<script>
+import axios from "axios";
+
+export default {
+  name: "MyInfo",
+
+  data: () => ({
+    info: null,
+  }),
+
+  methods: {
+    async fetchInfo() {
+      const { data } = await axios.get("https://jsonplaceholder.typicode.com/users/1");
+      this.info = data;
+    },
+  },
+
+  async created() {
+    await this.fetchInfo();
+  },
+
+  render() {
+    return (
+      <div>
+        이름:
+        {this.info ? this.info.name : ""}
+      </div>
+    );
+  },
+};
+</script>
+```
+
+<br/>
+
+먼저 ``09. 테스트를 위한 Mock 함수`` 에서 했던 테스트처럼, Mock 함수를 사용하여 테스트 유닛을 작성하면 다음과 같습니다.
+
+```javascript
+// 경로: "@/components/08_Spy/__tests__/MyInfo.spec.js"
+
+import MyInfo from "@/components/08_Spy/MyInfo.vue";
+import { shallowMount } from "@vue/test-utils";
+import axios from "axios";
+
+describe("MyInfo 테스트", () => {
+  it("비동기 메서드 테스트", () => {
+    const mockRescponse = {
+      data: {
+        name: "Alice",
+      },
+    };
+
+    axios.get = jest.fn().mockResolvedValue(mockResponse);
+
+    const wrapper = shallowMount(MyInfo);
+
+    window.setTimeout(() => {
+      expect(wrapper.text()).toBe("이름: Alice");
+    });
+  });
+});
+```
+
+<br/>
+
+<img src="./readmeAssets/08-mock-function-03.png" width="700px"><br/>
+
+<br/>
+
+기대했던 테스트 통과가 되었습니다.
+
+여기서, 테스트 케이스를 추가로 만들고, ``axios.get`` 을 다시 호출해 보겠습니다.
+
+<br/>
+
+```html
+<!-- 경로: "@/components/08_Spy/__tests__/MyInfo2.spec.js" -->
+
+<script>
+import MyInfo from "@/components/08_Spy/MyInfo.vue";
+import { shallowMount } from "@vue/test-utils";
+import axios from "axios";
+
+describe("axios.get 확인", () => {
+  it("비동기 메서드 테스트", () => {
+    const mockResponse = {
+      data: {
+        name: "Alice",
+      },
+    };
+
+    axios.get = jest.fn().mockResolvedValue(mockResponse);
+
+    const wrapper = shallowMount(MyInfo);
+
+    window.setTimeout(() => {
+      expect(wrapper.text()).toBe("이름: Alice");
+    });
+  });
+
+  it("axios.get() === Alice", async () => {
+    const { data } = await axios.get();
+    expect(data.name).toBe("Alice");
+  });
+});
+</script>
+```
+
+<br/>
+
+<img src="./readmeAssets/09-spy-02.png" width="700px"><br/>
+
+<br/>
+
+두번째 추가한 테스트인 ``axios.get() === Alice`` 역시 통과 하였습니다.
+
+이 테스트가 통과했다는 것은, 첫번째 테스트에서 만들었던 Mock 함수가 여전히 반영되어 있다는 것입니다.
+
+이것은 테스트가 다른 테스트에 영향을 주는 상태이므로, 상당히 큰 문제입니다.
+
+<br/>
+
+이 문제를 해결하기 위해서, 기존의 ``axios.get``을 다시 ``rollback`` 해야 합니다.
+
+이러한 문제를 해결하기 위해, Jest 는 ``spyOn`` 메서드를 제공하고 있습니다.
+
+<br/>
+
+``jest.spyOn()`` 함수는 ``jest.fn()`` 처럼, Mock 함수를 만들 수 있습니다.
+
+가장 큰 차이점은, 기존함수를 복구할 수 있으며, 메서드 호출을 감지할 수 있습니다.
+
+아래의 코드는 ``jest.spyOn()`` 을 사용한 예시 입니다.
+
+```javascript
+// 경로: "@/components/08_Spy/__tests__/MyInfo3.spec.js"
+
+import MyInfo from "@/components/08_Spy/MyInfo.vue";
+import { shallowMount } from "@vue/test-utils";
+import axios from "axios";
+
+describe("spyOn() 을 사용한 MyInfo 테스트", () => {
+  it("비동기 메서드 테스트", () => {
+    const mockResponse = {
+      data: {
+        name: "Alice",
+      },
+    };
+
+    const spy = jest.spyOn(axios, "get").mockResolvedValue(mockResponse);
+
+    const wrapper = shallowMount(MyInfo);
+
+    window.setTimeout(() => {
+      expect(wrapper.text()).toBe("이름: Alice");
+    });
+
+    spy.mockRestore();
+  });
+
+  it("axios.get() !== Alice", async () => {
+    const response = await axios.get();
+    console.log(response.data.name);
+  })
+});
+```
+
+<br/>
+
+<img src="./readmeAssets/09-spy-03.png" width="700px"><br/>
+
+<br/>
+
+위 테스트 실행 결과, 두번째 테스트 케이스에서 실패하게 됩니다.
+
+만약, 첫번째 테스트 케이스에서 사용했던 Mock 함수가 여전히 유지되었다면, 정상동작이 되어야 했지만, 복원된 상태이므로 ``axios.get()`` 메서드가 비정상 호출이 된 것입니다.
+
+<br/>
+
+``jest.spyOn()`` 을 사용하여 Mock 함수를 제공하게 되면, ``spyOn()`` 반환객체의 ``mockRestore()`` 메서드를 사용하여, 원래 메서드로 복원시킬 수 있습니다.
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+이상 ``Vue Test Utils 스터디`` 정리를 마치겠습니다.
