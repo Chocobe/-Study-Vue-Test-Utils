@@ -1,5 +1,5 @@
 <script>
-import MyForm from "@/components/05_MyForm/MyForm.vue";
+import Todo from "@/components/07_MockMethod/Todo.vue";
 
 export default {
   name: "App",
@@ -7,7 +7,7 @@ export default {
   render() {
     return (
       <div id="app">
-        <MyForm />
+        <Todo />
       </div>
     );
   },

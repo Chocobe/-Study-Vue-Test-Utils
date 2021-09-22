@@ -25,6 +25,8 @@
 
 08. [08. Event 발생여부 테스트](#08)
 
+09. [09. 테스트를 위한 Mock 함수](#09)
+
 
 
 <br/><hr/><br/>
@@ -823,3 +825,158 @@ expect(wrapper.emitted().myEvent[0]).toEqual(["Hello", "Alice"]);
 
 
 ##### 09
+## 09. 테스트를 위한 Mock 함수
+
+컴포넌트를 테스트 할 때, 테스트를 위한 비용이 많이 발생하는 경우가 있습니다.
+
+예를 들면, API 호출은 테스트에서도 서버요청을 해야하는 비용이 발생하며, 이로인한 테스트 속도가 저하됩니다.
+
+이러한 경우, 컴포넌트의 실제 메서드 처럼 동작하지만, 테스트를 위한 간소화된 함수로 동작하는 Mock 함수를 만들 수 있습니다.
+
+<br/>
+
+아래의 코드는 Mock 함수 테스트를 위한 Todo 컴포넌트 입니다.
+
+```html
+<script>
+import axios from "axios";
+  
+export default {
+  name: "Todo",
+
+  data: () => ({
+    todo: {
+      type: Array,
+      default: [],
+    },
+  }),
+
+  methods: {
+    async fetchTodo() {
+      const { data } = await axios.get("https://jsonplaceholder.typicode.com/todos/1");
+      this.todo = data;
+    },
+  },
+
+  async created() {
+    await this.fetchTodo();
+  },
+
+  render() {
+    return <div>Todo: {this.todo.title}</div>;
+  },
+};
+</script>
+```
+
+<br/>
+
+먼저 Mock 함수를 작성하기 전, 원래의 동작을 테스트 해보겠습니다.
+
+```javascript
+// 경로: "@/components/07_MockMethod/__tests__/Todo.spec.js"
+
+import Todo from "@/components/07_MockMethod/Todo.vue";
+import { shallowMount } from "@vue/test-utils";
+
+describe("Todo 테스트", () => {
+  it("비동기 메서드 테스트", async () => {
+    const wrapper = shallowMount(Todo);
+
+    window.setTimeout(() => {
+      expect(wrapper.text()).toBe("delectus aut autem");
+      done();
+    }, 1000);
+  });
+});
+```
+
+<br/>
+
+<img src="./readmeAssets/08-mock-function-01.png" width="700px"><br/>
+
+<br/>
+
+테스트는 정상적으로 통과 합니다.
+
+하지만, 만약 테스트 환경의 네트워크가 5초를 넘어간다면, 테스트는 ``timeout`` 으로 통과하지 못합니다.
+
+<img src="./readmeAssets/08-mock-function-02.png" width="700px"><br/>
+
+<br/>
+
+따라서, 테스트를 작성할 때 서버요청 메서드는 Mock 함수로 작성해야 합니다.
+
+다음 코드는 Mock 메서드를 활용한 테스트 입니다.
+
+```javascript
+// 경로: "@/components/07_MockMethod/__tests__/Todo2.spec.js"
+
+import Todo from "@/components/07_MockMethod/Todo.vue";
+import { shallowMount } from "@vue/test-utils";
+import axios from "axios";
+
+describe("Todo 테스트", () => {
+  it("비동기 메서드 테스트", () => {
+    const mockResponse = {
+      data: {
+        title: "delectus aut autem",
+      },
+    };
+
+    axios.get = jest.fn().mockResolvedValue(mockResponse);
+
+    const wrapper = shallowMount(Todo);
+
+    window.setTimtou(() => {
+      expect(wrapper.text()).toBe("delectus aut autem");
+    });
+  });
+});
+```
+
+<br/>
+
+위의 테스트는 ``axios.get()`` 메서드에 Mock 메서드를 사용하도록 하여, 서버요청을 하지 않고 동작하도록 하였습니다.
+
+그러므로, 테스트 환경의 네트워크 속도에 무관하게 동일한 결과를 얻을 수 있습니다.
+
+<br/>
+
+Mock 함수를 만드는 부분은 다음과 같습니다.
+
+```javascript
+const mockResponse = {
+  data: {
+    title: "delectus aut autem",
+  },
+};
+
+axios.get = jest.fn().mockResolvedValue(mockResponse);
+```
+
+<br/>
+
+``jest.fn()`` 함수는 Mock 함수를 반환합니다.
+
+그리고 우리가 Mock 함수를 사용할 부분은 ``Promise 반환 함수`` 이므로, ``mockResolvedValue()``를 사용하여, ``Promise`` 의 ``resolve`` 값을 반환하도록 Mocking 한 코드입니다.
+
+<br/>
+
+Mock 함수를 사용한 테스트 역시 테스트를 통과함을 알 수 있습니다.
+
+<br/>
+
+<img src="./readmeAssets/08-mock-function-03.png" width="700px"><br/>
+
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 10
