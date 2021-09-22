@@ -21,6 +21,8 @@
 
 06. [``computed`` 테스트](#06)
 
+07. [Event 테스트](#07)
+
 
 
 <br/>
@@ -568,3 +570,164 @@ describe("NumberList 테스트", () => {
 
 
 ###### 07
+## 07. Event 테스트
+
+Event 는 비동기 처리를 위한 방법 중 하나 입니다.
+
+이번에는 버튼을 클릭했을 때의 동작을 테스트 해보겠습니다.
+
+아래의 코드는 ``<form>`` 형식의 컴포넌트 이며, 동작은 다음과 같습니다.
+
+* 사용자가 문자열을 입력합니다.
+* ``제출 버튼``을 클릭하면, 메시지가 출력 됩니다.
+
+<br/>
+
+```html
+<!-- 경로: "@/components/05_MyForm/MyForm.vue -->
+
+<script>
+export default {
+  data: () => ({
+    userName: '',
+    isFinished: false,
+  }),
+
+  methods: {
+    onInput(e) {
+      this.userName = e.target.value;
+    },
+
+    submitHandler(e) {
+      e.preventDefault();
+      this.isFinished = true;
+    },
+  },
+
+  render() {
+    return (
+      <div>
+        <form on-submit={this.submitHandler}>
+          <input 
+            type="text" 
+            value={this.userName} 
+            on-input={this.onInput} 
+            data-user-name
+          />
+          <input type="submit" value="제출하기">
+        </form>
+
+        {this.isFinished ? (
+          <div class="form-msg">안녕하세요, ${this.userName}님</div>
+        ) : (
+          ""
+        )}
+      </div>
+    );
+  },
+};
+</script>
+```
+
+<br/>
+
+위의 코드에서 사용되는 이벤트는 다음고 같습니다.
+
+* ``input`` 이벤트: 사용자가 문자열 입력 시 마다 발생
+* ``submit`` 이벤트: 사용자가 ``제출하기`` 버튼 클릭 시 발생
+
+<br/>
+
+아래의 코드는 ``submit`` 버튼을 클릭했을 때, 결과를 사용한 테스트 유닛 입니다.
+
+```javascript
+// 경로: "@/components/05_MyForm/__tests__/MyForm.spec.js"
+
+import MyForm from "../MyForm.vue";
+import { shallowMount } from "@vue/test-utils";
+
+describe("MyForm 테스트", () => {
+  it("'제출하기' 버튼 클릭 시, 메시지 출력", async () => {
+    const wrapper = shallowMount(MyForm, {
+      attachTo: document.body,
+    });
+
+    wrapper.find("[data-user-name]").element.value = "Alice";
+    await wrapper.find("[data-user-name]").trigger("input");
+    await wrapper.find("[type='submit']").trigger("click");
+
+    expect(wrapper.find(".form-msg").text()).toBe("안녕하세요, Alice님");
+
+    wrapper.destroy();
+  });
+});
+```
+
+<br/>
+
+테스트 코드 중, 아래의 코드를 살펴보겠습니다.
+
+```javascript
+wrapper.find("[data-user-name]").element.value = "Alice";
+```
+
+<br/>
+
+``wrapper`` 객체를 통해서, 특정 HTMLElement에 접근하기 위해, ``element`` 속성을 사용하였습니다.
+
+그리고 ``element``에 입력값을 담당하는 속성인 ``value`` 에 접근하여, 값(``Alice``)를 입력 하였습니다.
+
+<br/>
+
+여기서 중요한 점은, HTMLElement 의 속성에 직접 값을 입력할 경우, ``input`` 이벤트가 발생하지 않는다는 점입니다.
+
+때문에 아래의 코드를 사용하여, 직접 ``input`` 이벤트를 발생 시켰습니다.
+
+```javascript
+await wrapper.find("[data-user-name]").trigger("input");
+```
+
+<br/>
+
+위의 ``trigger()`` 함수는 이벤트를 발생시키며, ``Promise`` 를 반환하는 함수 입니다.
+
+따라서, ``await`` 키워드를 사용하여, 테스트 가상 DOM 의 갱신을 보장해 줍니다.
+
+<br/>
+
+이후, ``제출하기`` 버튼을 클릭하기 위해, 아래의 코드로 ``click`` 이벤트를 발생 시켰습니다.
+
+```javascript
+await wrapper.find("[type='submit']").trigger("click");
+```
+
+<br/>
+
+<img src="./readmeAssets/06-event-test-01.png" width="700px"><br/>
+
+<br/>
+
+마지막으로, wrapper 객체를 해제하는 코드를 보겠습니다.
+
+```javascript
+wrapper.destroy();
+```
+
+<br/>
+
+위의 코드는 wrapper 생성 시, ``attachTo`` 속성을 사용할 경우, 테스트 가상 DOM 을 rollback 시켜주는 역할을 해 줍니다.
+
+만약, destroy() 를 호출하지 않으면, 다음 테스트 케이스에서 정상 동작을 보장할 수 없습니다.
+
+| 공식: https://vue-test-utils.vuejs.org/api/wrapper/destroy.html#destroy
+
+
+<br/>
+
+[🔺 Top](#top)
+
+<hr/><br/>
+
+
+
+##### 08

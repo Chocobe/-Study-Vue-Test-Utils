@@ -1,5 +1,5 @@
 <script>
-import NumberList from "@/components/04_NumberList/NumberList.vue";
+import MyForm from "@/components/05_MyForm/MyForm.vue";
 
 export default {
   name: "App",
@@ -7,7 +7,7 @@ export default {
   render() {
     return (
       <div id="app">
-        <NumberList isOdd={true} />
+        <MyForm />
       </div>
     );
   },
