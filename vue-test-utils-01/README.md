@@ -719,7 +719,7 @@ wrapper.destroy();
 
 위의 코드는 wrapper 생성 시, ``attachTo`` 속성을 사용할 경우, 테스트 가상 DOM 을 rollback 시켜주는 역할을 해 줍니다.
 
-만약, destroy() 를 호출하지 않으면, 다음 테스트 케이스에서 정상 동작을 보장할 수 없습니다.
+만약, ``destroy()`` 를 호출하지 않으면, 다음 테스트 케이스에서 정상 동작을 보장할 수 없습니다.
 
 | 공식: https://vue-test-utils.vuejs.org/api/wrapper/destroy.html#destroy
 
@@ -1062,7 +1062,7 @@ describe("MyInfo 테스트", () => {
 
 <br/>
 
-<img src="./readmeAssets/08-mock-function-03.png" width="700px"><br/>
+<img src="./readmeAssets/09-09-spy-01.png" width="700px"><br/>
 
 <br/>
 
