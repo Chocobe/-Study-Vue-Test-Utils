@@ -1189,3 +1189,5 @@ describe("spyOn() 을 사용한 MyInfo 테스트", () => {
 
 
 이상 ``Vue Test Utils 스터디`` 정리를 마치겠습니다.
+
+[이전 페이지로 이동](https://github.com/Chocobe/-Study-Vue-Test-Utils)

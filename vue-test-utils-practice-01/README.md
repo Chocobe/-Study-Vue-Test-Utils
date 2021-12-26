@@ -788,7 +788,7 @@ const wrapper = shallowMount(MySlotList, {
 
 <br/>
 
-## 1. 일반 문자열
+## 07-01. ``일반 문자열`` 로 scopedSlot 정의
 
 일반 문자열을 사용하여 ``scopedSlot``을 정의할 수 있습니다.
 
@@ -809,7 +809,7 @@ const wrapper = shallowMount(MySlotList, {
 
 <br/>
 
-## 2. ``JSX`` 함수
+## 07-02. ``JSX 함수`` 로 scopedSlot 정의
 
 ``JSX`` 형식의 함수로도 ``scopedSlot`` 을 작성할 수 있습니다.
 
@@ -835,6 +835,8 @@ const wrapper = shallowMount(MySlotList, {
 ```
 
 <br/>
+
+## 07-03. scopedSlot 테스트 코드
 
 위의 방법들을 사용하여 ``scopedSlots`` 를 테스트하면 다음과 같습니다.
 
@@ -965,3 +967,11 @@ describe("MyScopedSlotList 테스트", () => {
   });
 });
 ```
+
+
+
+<br/><hr/><br/>
+
+
+
+[이전 페이지로 이동](https://github.com/Chocobe/-Study-Vue-Test-Utils)
